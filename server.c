@@ -30,6 +30,11 @@ main(int argc, char *argv[])
     /* Bind socket to socket name. */
     name.sun_family = AF_UNIX;
     strncpy(name.sun_path, SOCKET_NAME, sizeof(name.sun_path) - 1);
+    /* search: bind address already in use "sys/socket.h"
+       https://stackoverflow.com/questions/49604087/what-do-i-change-in-this-code-to-not-get-bind-address-already-in-use-perror/49604176#49604176
+       https://stackoverflow.com/questions/17451971/getting-address-already-in-use-error-using-unix-socket
+    */
+    unlink(SOCKET_NAME);
     ret = bind(connection_socket, (const struct sockaddr *) &name,
                sizeof(name));
     if (ret == -1) {
@@ -62,6 +67,7 @@ main(int argc, char *argv[])
                 perror("read");
                 exit(EXIT_FAILURE);
             }
+            puts(buffer);
             /* Ensure buffer is 0-terminated. */
             buffer[sizeof(buffer) - 1] = 0;
             /* Handle commands. */
